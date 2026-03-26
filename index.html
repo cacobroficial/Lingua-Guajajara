@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#1a3a1a">
+<meta name="description" content="Nhe'ẽ - Aprenda a língua Guajajara (Tenetehára)">
+<title>Nhe'ẽ — Língua Guajajara</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Nunito:wght@400;600;800&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --forest:    #0f2a0f;
+  --canopy:    #1e4a1e;
+  --leaf:      #2d6a2d;
+  --moss:      #4a8c3f;
+  --lime:      #7ec850;
+  --urucum:    #c94a1a;
+  --terra:     #8b3a0f;
+  --clay:      #d4723a;
+  --sun:       #f5b942;
+  --cream:     #fef6e4;
+  --sky:       #1a3d6e;
+  --ara-blue:  #2466b0;
+  --ara-light: #5ba3e0;
+  --text-dark: #1a1a0a;
+  --text-mid:  #3a3020;
+  --text-light:#fef6e4;
+  --shadow:    rgba(10,30,10,0.5);
+  --r: .9rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--forest);
+  color: var(--text-light);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── SPLASH / HOME ──────────────────────────────────────── */
+#splash {
+  position: fixed; inset: 0; z-index: 1000;
+  background: radial-gradient(ellipse at 60% 40%, #1e4a1e 0%, #0a1a0a 70%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  transition: opacity .8s ease, visibility .8s;
+}
+#splash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+#splash-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.splash-content {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 1rem;
+  animation: splashIn 1.2s ease forwards;
+}
+@keyframes splashIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.app-name {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3rem, 12vw, 6rem);
+  font-weight: 700;
+  color: var(--sun);
+  text-shadow: 0 0 40px rgba(245,185,66,.4), 0 4px 20px var(--shadow);
+  letter-spacing: -.02em;
+  line-height: 1;
+}
+.app-subtitle {
+  font-size: clamp(.85rem, 3vw, 1.1rem);
+  color: var(--lime);
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.app-tagline {
+  font-family: 'Kalam', cursive;
+  font-size: clamp(1rem, 4vw, 1.4rem);
+  color: var(--clay);
+  margin-top: .5rem;
+}
+
+.mascot-wrap {
+  margin: 1.5rem 0;
+  filter: drop-shadow(0 8px 24px rgba(36,102,176,.4));
+  animation: float 4s ease-in-out infinite;
+}
+@keyframes float {
+  0%,100% { transform: translateY(0) rotate(-2deg); }
+  50%      { transform: translateY(-12px) rotate(2deg); }
+}
+
+.btn-start {
+  margin-top: 1.5rem;
+  padding: .9rem 2.5rem;
+  background: linear-gradient(135deg, var(--urucum), var(--clay));
+  color: #fff;
+  border: none; border-radius: 50px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.1rem; font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(201,74,26,.4);
+  transition: transform .2s, box-shadow .2s;
+  letter-spacing: .05em;
+}
+.btn-start:hover { transform: scale(1.05); box-shadow: 0 10px 32px rgba(201,74,26,.6); }
+
+/* ─── MAIN APP ────────────────────────────────────────────── */
+#app { display: none; flex-direction: column; min-height: 100vh; }
+#app.visible { display: flex; }
+
+/* TOP BAR */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: linear-gradient(90deg, var(--forest), var(--canopy));
+  border-bottom: 2px solid var(--moss);
+  padding: .7rem 1rem;
+  display: flex; align-items: center; gap: .7rem;
+  box-shadow: 0 2px 12px var(--shadow);
+}
+.topbar-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem; font-weight: 700;
+  color: var(--sun);
+}
+.topbar-mascot {
+  margin-left: auto;
+  cursor: pointer;
+  animation: float 4s ease-in-out infinite;
+  filter: drop-shadow(0 2px 6px rgba(36,102,176,.5));
+}
+.topbar-mascot:hover { animation-play-state: paused; transform: scale(1.15); }
+
+/* ─── NAV TABS ───────────────────────────────────────────── */
+.nav-tabs {
+  display: flex; overflow-x: auto; gap: .3rem;
+  padding: .5rem .8rem;
+  background: var(--canopy);
+  border-bottom: 1px solid var(--leaf);
+  scrollbar-width: none;
+}
+.nav-tabs::-webkit-scrollbar { display: none; }
+.nav-tab {
+  flex: 0 0 auto;
+  padding: .45rem 1rem;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  background: transparent;
+  color: var(--lime);
+  font-family: 'Nunito', sans-serif;
+  font-size: .85rem; font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  white-space: nowrap;
+}
+.nav-tab:hover { background: var(--leaf); color: var(--sun); }
+.nav-tab.active {
+  background: var(--urucum);
+  border-color: var(--clay);
+  color: #fff;
+}
+
+/* ─── CONTENT PANELS ─────────────────────────────────────── */
+.panel { display: none; padding: 1rem; animation: fadeIn .3s ease; }
+.panel.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ─── SECTION CARDS ──────────────────────────────────────── */
+.card {
+  background: linear-gradient(135deg, rgba(30,74,30,.85), rgba(15,42,15,.9));
+  border: 1px solid var(--moss);
+  border-radius: 16px;
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 16px var(--shadow);
+  backdrop-filter: blur(4px);
+}
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  color: var(--sun);
+  margin-bottom: .5rem;
+}
+.card p { color: var(--cream); line-height: 1.7; font-size: .95rem; }
+
+/* ─── HISTORY SECTION ─────────────────────────────────────── */
+.history-hero {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  min-height: 180px;
+  background: linear-gradient(135deg, #1e3a1e, #0a2a2a);
+  display: flex; align-items: flex-end;
+}
+.history-hero-bg {
+  position: absolute; inset: 0;
+  background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Flag_of_Brazil.svg/1200px-Flag_of_Brazil.svg.png') center/cover;
+  opacity: .08;
+}
+.history-hero-content {
+  position: relative; z-index: 1;
+  padding: 1.5rem;
+}
+.history-hero-content h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem; color: var(--sun);
+}
+.history-hero-content p {
+  color: var(--lime); font-size: .9rem; margin-top: .3rem;
+}
+
+.timeline { border-left: 3px solid var(--moss); margin-left: .8rem; padding-left: 1.2rem; }
+.timeline-item { position: relative; margin-bottom: 1.5rem; }
+.timeline-item::before {
+  content: '';
+  position: absolute; left: -1.65rem; top: .3rem;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--urucum);
+  border: 3px solid var(--sun);
+}
+.timeline-year {
+  font-size: .8rem; font-weight: 800;
+  color: var(--clay); letter-spacing: .1em; text-transform: uppercase;
+  margin-bottom: .2rem;
+}
+.timeline-text { color: var(--cream); line-height: 1.6; font-size: .92rem; }
+
+.video-embed {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 1rem 0;
+  background: #000;
+  box-shadow: 0 4px 20px var(--shadow);
+  aspect-ratio: 16/9;
+}
+.video-embed iframe { width: 100%; height: 100%; border: none; }
+
+.img-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; margin: 1rem 0; }
+.img-card {
+  border-radius: 12px; overflow: hidden;
+  background: var(--canopy);
+  border: 1px solid var(--moss);
+}
+.img-card img { width: 100%; height: 110px; object-fit: cover; display: block; }
+.img-card span {
+  display: block; padding: .4rem .6rem;
+  font-size: .75rem; color: var(--lime);
+  text-align: center;
+}
+
+/* ─── LEVELS / MODULES ───────────────────────────────────── */
+.level-header {
+  display: flex; align-items: center; gap: .8rem;
+  padding: 1rem 1.2rem;
+  border-radius: 14px;
+  margin-bottom: .8rem;
+  cursor: pointer;
+  transition: transform .2s;
+}
+.level-header:hover { transform: translateX(4px); }
+.level-badge {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+.level-info h3 { font-size: 1.05rem; font-weight: 800; }
+.level-info p  { font-size: .8rem; opacity: .8; }
+
+.level-basic    { background: linear-gradient(135deg,#1e5c1e,#0f3a0f); border: 1px solid var(--moss); }
+.level-inter    { background: linear-gradient(135deg,#1a3d6e,#0f2040); border: 1px solid var(--ara-blue); }
+.level-adv1     { background: linear-gradient(135deg,#5a1e00,#3a0f00); border: 1px solid var(--urucum); }
+.level-adv2     { background: linear-gradient(135deg,#3a2a00,#1a1000); border: 1px solid var(--sun); }
+
+.modules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; margin-bottom: 1rem; }
+.module-btn {
+  background: linear-gradient(135deg, rgba(30,74,30,.9), rgba(15,42,15,.95));
+  border: 1px solid var(--moss);
+  border-radius: 14px;
+  padding: 1rem .8rem;
+  cursor: pointer;
+  transition: all .2s;
+  text-align: center;
+  color: var(--cream);
+}
+.module-btn:hover { border-color: var(--sun); transform: scale(1.03); background: linear-gradient(135deg,#2d6a2d,#1e4a1e); }
+.module-btn .mod-icon { font-size: 1.8rem; display: block; margin-bottom: .4rem; }
+.module-btn .mod-name { font-size: .85rem; font-weight: 700; color: var(--lime); }
+.module-btn .mod-count { font-size: .72rem; color: var(--clay); }
+
+/* ─── LESSON / VOCAB CARDS ───────────────────────────────── */
+.lesson-header {
+  display: flex; align-items: center; gap: .7rem;
+  margin-bottom: 1rem;
+}
+.back-btn {
+  background: var(--canopy); border: 1px solid var(--moss);
+  color: var(--lime); border-radius: 10px;
+  padding: .4rem .8rem; font-size: .85rem; cursor: pointer;
+  transition: all .2s;
+}
+.back-btn:hover { background: var(--leaf); }
+
+.lesson-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem; color: var(--sun);
+}
+
+.vocab-card {
+  background: linear-gradient(135deg, rgba(35,70,35,.9), rgba(15,42,15,.95));
+  border: 1px solid var(--leaf);
+  border-radius: 16px;
+  padding: 1.2rem;
+  margin-bottom: .8rem;
+  display: flex; align-items: flex-start; gap: .9rem;
+  box-shadow: 0 3px 12px var(--shadow);
+  transition: border-color .2s, transform .2s;
+}
+.vocab-card:hover { border-color: var(--sun); transform: translateX(3px); }
+
+.vocab-main { flex: 1; }
+.vocab-word {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem; font-weight: 700;
+  color: var(--sun);
+  line-height: 1.2;
+}
+.vocab-pron {
+  font-size: .82rem; color: var(--clay);
+  margin: .15rem 0;
+  font-style: italic;
+}
+.vocab-pt {
+  font-size: 1rem; color: var(--cream); font-weight: 600;
+  margin: .2rem 0;
+}
+.vocab-example {
+  font-size: .84rem; color: var(--lime);
+  margin-top: .3rem; line-height: 1.5;
+  border-top: 1px solid rgba(74,140,63,.3);
+  padding-top: .4rem;
+}
+.vocab-note {
+  font-size: .78rem; color: var(--clay);
+  margin-top: .25rem;
+  font-style: italic;
+}
+
+.tts-btn {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ara-blue), var(--sky));
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(36,102,176,.4);
+  transition: transform .2s, box-shadow .2s;
+}
+.tts-btn:hover { transform: scale(1.1); box-shadow: 0 5px 16px rgba(36,102,176,.6); }
+.tts-btn:active { transform: scale(.95); }
+
+/* ─── PRONUNCIATION GUIDE ────────────────────────────────── */
+.pron-guide-section { margin-bottom: 1.2rem; }
+.pron-guide-section h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem; color: var(--sun);
+  margin-bottom: .6rem;
+  display: flex; align-items: center; gap: .4rem;
+}
+.pron-table { width: 100%; border-collapse: collapse; }
+.pron-table th {
+  background: var(--canopy); color: var(--lime);
+  padding: .5rem .7rem; text-align: left;
+  font-size: .82rem; letter-spacing: .05em;
+  border-bottom: 2px solid var(--moss);
+}
+.pron-table td {
+  padding: .55rem .7rem; color: var(--cream);
+  border-bottom: 1px solid rgba(74,140,63,.2);
+  font-size: .88rem; vertical-align: top;
+}
+.pron-table tr:hover td { background: rgba(45,106,45,.2); }
+.pron-gua { color: var(--sun); font-weight: 700; font-size: 1rem; }
+.pron-ipa { color: var(--clay); font-style: italic; }
+.pron-br  { color: var(--lime); font-weight: 600; }
+.pron-ex  { color: #aaa; font-size: .8rem; }
+
+/* ─── GUIDE / ARAWY ──────────────────────────────────────── */
+.guide-bubble {
+  position: fixed; bottom: 5.5rem; right: 1rem; z-index: 200;
+  max-width: 260px; min-width: 200px;
+  background: linear-gradient(135deg, var(--sky), var(--ara-blue));
+  border: 2px solid var(--ara-light);
+  border-radius: 16px 16px 4px 16px;
+  padding: .9rem 1rem;
+  color: #fff;
+  font-size: .9rem; line-height: 1.5;
+  box-shadow: 0 8px 24px rgba(36,102,176,.5);
+  display: none;
+  animation: popIn .3s ease;
+}
+@keyframes popIn {
+  from { opacity: 0; transform: scale(.8) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.guide-bubble.visible { display: block; }
+.guide-bubble .close-bubble {
+  position: absolute; top: .4rem; right: .6rem;
+  background: none; border: none; color: rgba(255,255,255,.7);
+  cursor: pointer; font-size: 1rem; line-height: 1;
+}
+.guide-bubble strong { color: var(--sun); }
+.guide-btn {
+  position: fixed; bottom: 1.2rem; right: 1rem; z-index: 200;
+  width: 60px; height: 60px;
+  background: linear-gradient(135deg, var(--ara-blue), var(--sky));
+  border: 3px solid var(--ara-light);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(36,102,176,.5);
+  animation: pulseAra 3s ease-in-out infinite;
+  font-size: 2rem;
+}
+@keyframes pulseAra {
+  0%,100% { box-shadow: 0 6px 20px rgba(36,102,176,.5); }
+  50%      { box-shadow: 0 6px 32px rgba(91,163,224,.8); }
+}
+
+/* ─── DICTIONARY ─────────────────────────────────────────── */
+.dict-search-wrap {
+  position: relative; margin-bottom: 1rem;
+}
+.dict-search {
+  width: 100%; padding: .75rem 1rem .75rem 2.5rem;
+  background: rgba(30,74,30,.7);
+  border: 1px solid var(--moss);
+  border-radius: 12px;
+  color: var(--cream); font-size: .95rem;
+  font-family: 'Nunito', sans-serif;
+  outline: none;
+  transition: border-color .2s;
+}
+.dict-search::placeholder { color: rgba(254,246,228,.4); }
+.dict-search:focus { border-color: var(--sun); }
+.dict-search-icon {
+  position: absolute; left: .8rem; top: 50%;
+  transform: translateY(-50%);
+  color: var(--moss); font-size: 1.1rem;
+}
+.dict-results { margin-top: .5rem; }
+.dict-entry {
+  padding: .9rem 1rem;
+  background: rgba(30,74,30,.6);
+  border: 1px solid rgba(74,140,63,.3);
+  border-radius: 12px; margin-bottom: .6rem;
+  cursor: pointer; transition: border-color .2s;
+}
+.dict-entry:hover { border-color: var(--sun); }
+.dict-gua { font-size: 1.15rem; color: var(--sun); font-weight: 700; }
+.dict-pt  { font-size: .9rem; color: var(--cream); }
+.dict-cat { font-size: .75rem; color: var(--clay); text-transform: uppercase; letter-spacing: .06em; margin-top: .2rem; }
+
+/* ─── QUIZ ───────────────────────────────────────────────── */
+.quiz-question {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem; color: var(--sun);
+  text-align: center; margin: 1rem 0 1.5rem;
+  line-height: 1.4;
+}
+.quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+.quiz-opt {
+  padding: .9rem .7rem;
+  background: rgba(30,74,30,.8);
+  border: 2px solid var(--moss);
+  border-radius: 14px; cursor: pointer;
+  color: var(--cream); font-size: .9rem; font-weight: 600;
+  text-align: center; transition: all .2s;
+}
+.quiz-opt:hover { border-color: var(--sun); background: rgba(45,106,45,.9); }
+.quiz-opt.correct { border-color: var(--lime); background: rgba(45,106,45,.9); color: var(--lime); }
+.quiz-opt.wrong   { border-color: var(--urucum); background: rgba(120,30,0,.5); color: #ff9977; }
+.quiz-progress {
+  height: 6px; background: rgba(74,140,63,.3);
+  border-radius: 3px; margin-bottom: 1rem; overflow: hidden;
+}
+.quiz-progress-bar {
+  height: 100%; background: linear-gradient(90deg, var(--moss), var(--lime));
+  border-radius: 3px; transition: width .4s ease;
+}
+.quiz-score {
+  text-align: center; padding: 1.5rem;
+}
+.quiz-score h2 { font-family:'Playfair Display',serif; color:var(--sun); font-size:2rem; }
+.quiz-score p  { color:var(--cream); margin:.5rem 0; }
+
+/* ─── RESPONSIVE ─────────────────────────────────────────── */
+@media (min-width: 600px) {
+  .modules-grid { grid-template-columns: repeat(3, 1fr); }
+  .vocab-word { font-size: 1.6rem; }
+}
+
+/* ─── SCROLLBAR ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--forest); }
+::-webkit-scrollbar-thumb { background: var(--moss); border-radius: 3px; }
+
+/* ─── LOADER ─────────────────────────────────────────────── */
+.loader { display:flex; align-items:center; justify-content:center; padding:2rem; }
+.loader-dots span {
+  display:inline-block; width:10px; height:10px;
+  border-radius:50%; background:var(--moss);
+  margin:0 4px; animation:bounce 1.4s infinite;
+}
+.loader-dots span:nth-child(2){animation-delay:.2s;}
+.loader-dots span:nth-child(3){animation-delay:.4s;}
+@keyframes bounce{0%,80%,100%{transform:scale(.7);opacity:.5}40%{transform:scale(1);opacity:1}}
+
+.badge-row { display:flex; flex-wrap:wrap; gap:.5rem; margin:.5rem 0; }
+.badge {
+  padding:.25rem .7rem; border-radius:20px;
+  font-size:.75rem; font-weight:700; letter-spacing:.04em;
+}
+.badge-green  { background:rgba(74,140,63,.25); color:var(--lime); border:1px solid var(--moss); }
+.badge-orange { background:rgba(201,74,26,.2); color:var(--clay); border:1px solid var(--urucum); }
+.badge-blue   { background:rgba(36,102,176,.2); color:var(--ara-light); border:1px solid var(--ara-blue); }
+
+.sep { height:1px; background:linear-gradient(90deg,transparent,var(--moss),transparent); margin:1rem 0; }
+
+.tts-pron-note {
+  background: rgba(36,102,176,.15);
+  border: 1px solid var(--ara-blue);
+  border-radius: 10px;
+  padding: .7rem .9rem;
+  font-size: .83rem;
+  color: var(--ara-light);
+  margin-top: .4rem;
+  line-height: 1.5;
+}
+.tts-pron-note strong { color: var(--sun); }
+</style>
+</head>
+<body>
+
+<!-- ─── SPLASH ───────────────────────────────────────────── -->
+<div id="splash">
+  <canvas id="splash-canvas"></canvas>
+  <div class="splash-content">
+    <div class="mascot-wrap">
+      <svg width="110" height="110" viewBox="0 0 110 110" id="arawy-main">
+        <!-- Arara Azul Arawy -->
+        <ellipse cx="55" cy="62" rx="22" ry="28" fill="#2466b0"/>
+        <ellipse cx="55" cy="58" rx="18" ry="22" fill="#3a7fd6"/>
+        <!-- barriga -->
+        <ellipse cx="55" cy="68" rx="11" ry="14" fill="#f5e6c0"/>
+        <!-- cabeça -->
+        <ellipse cx="55" cy="34" rx="18" ry="17" fill="#2466b0"/>
+        <ellipse cx="55" cy="34" rx="13" ry="12" fill="#3a7fd6"/>
+        <!-- bico -->
+        <path d="M46 40 Q44 46 50 44 Q47 40 46 40Z" fill="#1a1a00"/>
+        <path d="M46 40 Q43 43 47 44 Q45 40 46 40Z" fill="#333300"/>
+        <!-- olho esq -->
+        <circle cx="47" cy="30" r="5" fill="#fff"/>
+        <circle cx="47" cy="30" r="3" fill="#1a1a00"/>
+        <circle cx="48" cy="29" r="1" fill="#fff"/>
+        <!-- olho dir -->
+        <circle cx="63" cy="30" r="5" fill="#fff"/>
+        <circle cx="63" cy="30" r="3" fill="#1a1a00"/>
+        <circle cx="64" cy="29" r="1" fill="#fff"/>
+        <!-- anel facial amarelo -->
+        <path d="M42 38 Q44 50 55 50 Q66 50 68 38" stroke="#f5b942" stroke-width="2.5" fill="none"/>
+        <!-- asa esq -->
+        <ellipse cx="30" cy="58" rx="14" ry="22" fill="#1a55a0" transform="rotate(-15 30 58)"/>
+        <ellipse cx="32" cy="58" rx="9" ry="17" fill="#2466b0" transform="rotate(-15 32 58)"/>
+        <!-- asa dir -->
+        <ellipse cx="80" cy="58" rx="14" ry="22" fill="#1a55a0" transform="rotate(15 80 58)"/>
+        <ellipse cx="78" cy="58" rx="9" ry="17" fill="#2466b0" transform="rotate(15 78 58)"/>
+        <!-- cauda -->
+        <path d="M45 88 Q55 102 65 88 Q60 95 55 96 Q50 95 45 88Z" fill="#1a55a0"/>
+        <path d="M48 90 Q55 100 62 90" stroke="#2466b0" stroke-width="1.5" fill="none"/>
+        <!-- pés -->
+        <rect x="48" y="90" width="5" height="7" rx="2" fill="#c94a1a"/>
+        <rect x="57" y="90" width="5" height="7" rx="2" fill="#c94a1a"/>
+      </svg>
+    </div>
+    <div class="app-name">Nhe'ẽ</div>
+    <div class="app-subtitle">Língua Guajajara · Tenetehára</div>
+    <div class="app-tagline">"A palavra que carrega a alma do povo"</div>
+    <button class="btn-start" onclick="startApp()">
+  ✨ Começar a aprender
+</button>
+  </div>
+</div>
+
+<!-- ─── MAIN APP ──────────────────────────────────────────── -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">Nhe'ẽ</div>
+    <span style="font-size:.78rem;color:var(--lime);margin-left:.2rem;">· Guajajara</span>
+    <svg class="topbar-mascot" width="42" height="42" viewBox="0 0 110 110" onclick="arawySpeak('greeting')" title="Arawy — toque para ajuda!">
+      <ellipse cx="55" cy="62" rx="22" ry="28" fill="#2466b0"/>
+      <ellipse cx="55" cy="34" rx="18" ry="17" fill="#2466b0"/>
+      <ellipse cx="55" cy="34" rx="13" ry="12" fill="#3a7fd6"/>
+      <path d="M46 40 Q44 46 50 44 Q47 40 46 40Z" fill="#1a1a00"/>
+      <circle cx="47" cy="30" r="5" fill="#fff"/><circle cx="47" cy="30" r="3" fill="#1a1a00"/><circle cx="48" cy="29" r="1" fill="#fff"/>
+      <circle cx="63" cy="30" r="5" fill="#fff"/><circle cx="63" cy="30" r="3" fill="#1a1a00"/><circle cx="64" cy="29" r="1" fill="#fff"/>
+      <path d="M42 38 Q44 50 55 50 Q66 50 68 38" stroke="#f5b942" stroke-width="2.5" fill="none"/>
+      <ellipse cx="55" cy="68" rx="11" ry="14" fill="#f5e6c0"/>
+    </svg>
+  </div>
+
+  <div class="nav-tabs" id="navTabs">
+    <button class="nav-tab active" onclick="showPanel('home')">🏠 Início</button>
+    <button class="nav-tab" onclick="showPanel('history')">📜 História</button>
+    <button class="nav-tab" onclick="showPanel('course')">📚 Curso</button>
+    <button class="nav-tab" onclick="showPanel('pronunciation')">🎵 Pronúncia</button>
+    <button class="nav-tab" onclick="showPanel('dictionary')">📖 Dicionário</button>
+    <button class="nav-tab" onclick="showPanel('quiz')">🏆 Quiz</button>
+  </div>
+
+  <!-- HOME -->
+  <div class="panel active" id="panel-home">
+    <div class="card" style="background:linear-gradient(135deg,rgba(36,102,176,.3),rgba(15,42,15,.9));border-color:var(--ara-blue)">
+      <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.7rem">
+        <svg width="48" height="48" viewBox="0 0 110 110">
+          <ellipse cx="55" cy="62" rx="22" ry="28" fill="#2466b0"/>
+          <ellipse cx="55" cy="34" rx="18" ry="17" fill="#2466b0"/>
+          <ellipse cx="55" cy="34" rx="13" ry="12" fill="#3a7fd6"/>
+          <path d="M46 40 Q44 46 50 44 Q47 40 46 40Z" fill="#1a1a00"/>
+          <circle cx="47" cy="30" r="5" fill="#fff"/><circle cx="47" cy="30" r="3" fill="#1a1a00"/>
+          <circle cx="63" cy="30" r="5" fill="#fff"/><circle cx="63" cy="30" r="3" fill="#1a1a00"/>
+          <path d="M42 38 Q44 50 55 50 Q66 50 68 38" stroke="#f5b942" stroke-width="2.5" fill="none"/>
+          <ellipse cx="55" cy="68" rx="11" ry="14" fill="#f5e6c0"/>
+        </svg>
+        <div>
+          <div style="color:var(--sun);font-weight:800;font-size:1rem">Arawy diz:</div>
+          <div style="color:var(--cream);font-size:.9rem">"Maraná, xe memihar! (Olá, meu aprendiz!)<br>Pronto para aprender Guajajara?"</div>
+        </div>
+      </div>
+      <button class="btn-start" onclick="showPanel('course')" style="font-size:.9rem;padding:.6rem 1.5rem">Ir para o Curso →</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🌿 O que é Nhe'ẽ?</div>
+      <p><strong style="color:var(--sun)">Nhe'ẽ</strong> (pronuncia: <em>nhe-ê</em>) significa <strong>"palavra, alma, fala"</strong> na família linguística Tupi-Guarani, raiz do Guajajara (Tenetehára). Este app foi criado para preservar e ensinar a língua viva de um povo que há séculos habita o Maranhão e o norte do Brasil.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🦜 Seu Guia: Arawy</div>
+      <p>Arawy é uma arara-azul mágica que conhece todas as palavras Guajajara. Clique nela no canto superior ou no botão azul (↓ direita) a qualquer momento para obter dicas de pronúncia, exemplos de uso e explicações gramaticais.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1rem">
+      <div class="card" style="cursor:pointer;text-align:center" onclick="showPanel('course')">
+        <div style="font-size:2rem">📚</div>
+        <div style="color:var(--lime);font-weight:700;font-size:.9rem">4 Níveis</div>
+        <div style="color:var(--cream);font-size:.8rem">Básico ao Avançado</div>
+      </div>
+      <div class="card" style="cursor:pointer;text-align:center" onclick="showPanel('dictionary')">
+        <div style="font-size:2rem">📖</div>
+        <div style="color:var(--lime);font-weight:700;font-size:.9rem">Dicionário</div>
+        <div style="color:var(--cream);font-size:.8rem">+350 palavras</div>
+      </div>
+      <div class="card" style="cursor:pointer;text-align:center" onclick="showPanel('pronunciation')">
+        <div style="font-size:2rem">🎵</div>
+        <div style="color:var(--lime);font-weight:700;font-size:.9rem">Guia de Pronúncia</div>
+        <div style="color:var(--cream);font-size:.8rem">Para falantes do BR</div>
+      </div>
+      <div class="card" style="cursor:pointer;text-align:center" onclick="showPanel('quiz')">
+        <div style="font-size:2rem">🏆</div>
+        <div style="color:var(--lime);font-weight:700;font-size:.9rem">Quiz</div>
+        <div style="color:var(--cream);font-size:.8rem">Teste seu conhecimento</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📌 Frase do Dia</div>
+      <div id="daily-phrase" style="text-align:center;padding:.5rem 0">
+        <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--sun)">Xe memihar</div>
+        <div style="color:var(--clay);font-style:italic;font-size:.85rem">she-me-mî-hár</div>
+        <div style="color:var(--cream);margin:.3rem 0">Meu aprendiz / meu filho adotivo</div>
+        <button class="tts-btn" style="margin:.5rem auto" onclick="speakGuajajara('Xe memihar','she me mî hár')">🔊</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="panel" id="panel-history">
+    <div class="history-hero">
+      <div class="history-hero-bg"></div>
+      <div class="history-hero-content">
+        <h2>Povo Tenetehára</h2>
+        <p>Guardiões da Floresta Amazônica · Maranhão & Pará</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🌎 Quem são os Guajajara/Tenetehára?</div>
+      <p>Os <strong style="color:var(--sun)">Tenetehára</strong> — auto-denominação que significa <em>"os verdadeiros seres humanos"</em> ou <em>"gente de verdade"</em> — são um povo indígena falante de uma língua da família <strong>Tupi-Guarani</strong>. São conhecidos regionalmente como <strong>Guajajara</strong> (nome de origem externa, possivelmente significando "os que têm redes"). Habitam principalmente o estado do Maranhão, na região da Terra Indígena Araribóia e outras terras demarcadas.</p>
+    </div>
+
+    <div class="img-grid">
+      <div class="img-card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Guajajara_woman.jpg/320px-Guajajara_woman.jpg" alt="Mulher Guajajara" onerror="this.src='https://via.placeholder.com/160x110/1e4a1e/7ec850?text=Povo+Guajajara'">
+        <span>Aldeia Guajajara</span>
+      </div>
+      <div class="img-card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Guaja_man.jpg/320px-Guaja_man.jpg" alt="Homem indígena" onerror="this.src='https://via.placeholder.com/160x110/0f2a0f/f5b942?text=Floresta+Araribóia'">
+        <span>Terra Araribóia - MA</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🌿 Origem e Território</div>
+      <p>Linguisticamente, o Guajajara pertence ao <strong>sub-ramo IV</strong> da família Tupi-Guarani (Tupian), juntamente com o Tembé, língua dos Tenetehára do Pará. Acredita-se que os ancestrais Tenetehára migraram das regiões do rio Tocantins e Araguaia para o atual Maranhão há pelo menos <strong>3 a 4 séculos</strong>. Vivem em aldeias ao longo dos rios Pindaré, Grajaú, Mearim e Zutiua.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⏳ Linha do Tempo Histórica</div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-year">Pré-colonial (séc. XVII)</div>
+          <div class="timeline-text">Os Tenetehára habitavam o vale do Pindaré e regiões do sul do Maranhão. Mantinham comércio e conflitos com outros povos Tupi. Sua língua era usada como <em>língua geral</em> na região.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">1653 — Primeiro contato jesuíta</div>
+          <div class="timeline-text">Padres jesuítas (especialmente o Pe. António Vieira) entram em contato com os Tenetehára no Maranhão. Iniciam-se as primeiras tentativas de catequização, que levaram ao registro parcial da língua.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">Séc. XVIII — Século de Resistência</div>
+          <div class="timeline-text">Os Tenetehára protagonizam diversas revoltas contra o avanço colonial. A "Revolta de 1901" (chamada Balaiada Indígena) é um dos episódios mais conhecidos de resistência armada organizada pelo povo Guajajara.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">1944 — Harrison & Harrison</div>
+          <div class="timeline-text">Os linguistas e missionários Carl e Frances Harrison produzem os primeiros materiais linguísticos sistemáticos do Guajajara: gramáticas e dicionários que se tornaram referência fundamental para o estudo da língua.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">1988 — Constituição Federal</div>
+          <div class="timeline-text">A Constituição Brasileira reconhece os direitos indígenas, incluindo o direito à terra, à cultura e à língua. Abre espaço legal para educação escolar bilíngue nas aldeias Tenetehára.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2000s — Educação Bilíngue</div>
+          <div class="timeline-text">Professores Guajajara começam a atuar nas escolas das aldeias com material didático em língua Tenetehára. Surgem cartilhas, livros e projetos de revitalização linguística apoiados pelo MEC e pela FUNAI.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2019 — Guardiões da Floresta</div>
+          <div class="timeline-text">O assassinato do líder Paulino Guajajara — integrante do grupo "Guardiões da Floresta" — coloca o povo Tenetehára em destaque internacional como defensores da Terra Indígena Araribóia contra invasores ilegais.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">Hoje — ~40.000 pessoas</div>
+          <div class="timeline-text">Os Tenetehára são um dos maiores povos indígenas do Brasil (~40.000 pessoas, IBGE 2022). A língua Guajajara é <strong>falada ativamente</strong> nas aldeias, com crianças e jovens aprendendo-a nas escolas. Considerada de vitalidade <em>relativamente segura</em> — porém ameaçada pelo avanço do desmatamento e pressão cultural externa.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎬 Documentários e Vídeos (requer internet)</div>
+      <p style="margin-bottom:.8rem;font-size:.85rem;color:var(--clay)">⚠️ Os vídeos abaixo requerem conexão com internet.</p>
+      <div class="video-embed">
+        <iframe src="https://www.youtube.com/embed/7XMNpb_Fmms" allowfullscreen title="Povo Guajajara - Documentário" loading="lazy"></iframe>
+      </div>
+      <p style="font-size:.8rem;color:var(--lime);margin-top:.4rem">📹 Povo Guajajara — Documentário FUNAI/IBGE</p>
+      <div class="video-embed" style="margin-top:.8rem">
+        <iframe src="https://www.youtube.com/embed/W5INNBNBMi4" allowfullscreen title="Língua Guajajara" loading="lazy"></iframe>
+      </div>
+      <p style="font-size:.8rem;color:var(--lime);margin-top:.4rem">📹 Guardiões da Floresta — Tenetehára</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Dados Atuais</div>
+      <div class="badge-row">
+        <span class="badge badge-green">~40.000 falantes</span>
+        <span class="badge badge-orange">Maranhão · Pará</span>
+        <span class="badge badge-blue">Família Tupi-Guarani</span>
+      </div>
+      <p style="margin-top:.7rem">A língua Guajajara/Tenetehára possui dois dialetos principais: o <strong style="color:var(--sun)">Guajajara</strong> (MA) e o <strong style="color:var(--sun)">Tembé</strong> (PA), mutuamente inteligíveis. Possui fonologia relativamente simples para falantes do português brasileiro, com alguns sons distintivos como a nasalização e a aspiração.</p>
+    </div>
+  </div>
+
+  <!-- COURSE -->
+  <div class="panel" id="panel-course">
+    <div id="course-home">
+      <div class="card" style="background:linear-gradient(135deg,rgba(36,102,176,.2),rgba(15,42,15,.9));border-color:var(--ara-blue)">
+        <div class="card-title" style="font-size:1rem;color:var(--ara-light)">🦜 Arawy explica os níveis:</div>
+        <p style="font-size:.87rem">"O aprendizado de Guajajara segue 4 níveis. Comece pelo Básico — domine saudações, família, números e o dia a dia. No Intermediário, construiremos frases completas. No Avançado 1, você lerá pequenos textos. No Avançado 2, interpretará textos autênticos Tenetehára!"</p>
+      </div>
+
+      <div class="level-header level-basic" onclick="showLevel('basic')">
+        <div class="level-badge" style="background:var(--moss);font-size:1.5rem">🌱</div>
+        <div class="level-info">
+          <h3 style="color:var(--lime)">Nível Básico</h3>
+          <p>Saudações, família, números, cores, corpo, natureza, alimentos, casa, animais, tempo</p>
+        </div>
+        <span style="color:var(--lime);font-size:1.3rem">›</span>
+      </div>
+
+      <div class="level-header level-inter" onclick="showLevel('inter')">
+        <div class="level-badge" style="background:var(--ara-blue);font-size:1.5rem">🌿</div>
+        <div class="level-info">
+          <h3 style="color:var(--ara-light)">Nível Intermediário</h3>
+          <p>Verbos, pronomes, frases simples, mercado, saúde, viagem, tradições, conversação</p>
+        </div>
+        <span style="color:var(--ara-light);font-size:1.3rem">›</span>
+      </div>
+
+      <div class="level-header level-adv1" onclick="showLevel('adv1')">
+        <div class="level-badge" style="background:var(--urucum);font-size:1.5rem">🔥</div>
+        <div class="level-info">
+          <h3 style="color:var(--clay)">Avançado 1</h3>
+          <p>Pequenos textos, narrativas, expressões idiomáticas, ritual e espiritualidade</p>
+        </div>
+        <span style="color:var(--clay);font-size:1.3rem">›</span>
+      </div>
+
+      <div class="level-header level-adv2" onclick="showLevel('adv2')">
+        <div class="level-badge" style="background:var(--sun);font-size:1.5rem">⭐</div>
+        <div class="level-info">
+          <h3 style="color:var(--sun)">Avançado 2</h3>
+          <p>Interpretação de textos autênticos, literatura oral, gramática aprofundada</p>
+        </div>
+        <span style="color:var(--sun);font-size:1.3rem">›</span>
+      </div>
+    </div>
+
+    <!-- Level modules display -->
+    <div id="level-display" style="display:none">
+      <div class="lesson-header">
+        <button class="back-btn" onclick="backToCourse()">← Voltar</button>
+        <div class="lesson-title" id="level-title">Nível Básico</div>
+      </div>
+      <div class="modules-grid" id="modules-grid"></div>
+    </div>
+
+    <!-- Lesson display -->
+    <div id="lesson-display" style="display:none">
+      <div class="lesson-header">
+        <button class="back-btn" onclick="backToLevel()">← Módulos</button>
+        <div class="lesson-title" id="lesson-title">Saudações</div>
+      </div>
+      <div id="vocab-list"></div>
+    </div>
+  </div>
+
+  <!-- PRONUNCIATION -->
+  <div class="panel" id="panel-pronunciation">
+    <div class="card" style="background:linear-gradient(135deg,rgba(36,102,176,.25),rgba(15,42,15,.9));border-color:var(--ara-blue)">
+      <div class="card-title" style="color:var(--ara-light)">🦜 Arawy — Guia de Pronúncia</div>
+      <p style="font-size:.87rem">"Sou especialista em sons! Aprenda a pronúncia correta do Guajajara. Atenção especial para falantes de português brasileiro — alguns sons são quase iguais, outros exigem prática!"</p>
+    </div>
+
+    <div class="pron-guide-section card">
+      <h3>🔤 Vogais Guajajara</h3>
+      <p style="font-size:.85rem;color:var(--clay);margin-bottom:.7rem">O Guajajara tem 6 vogais: a, e, i, o, u, y (vogal central não-arredondada)</p>
+      <table class="pron-table">
+        <tr><th>Letra</th><th>Som (BR)</th><th>Exemplo GUA</th><th>Significa</th></tr>
+        <tr><td class="pron-gua">a</td><td class="pron-br">como em "cama"</td><td>apo</td><td>fazer</td></tr>
+        <tr><td class="pron-gua">e</td><td class="pron-br">como em "café" (fechado)</td><td>re</td><td>tu (2ª p.)</td></tr>
+        <tr><td class="pron-gua">i</td><td class="pron-br">como em "vida"</td><td>itá</td><td>pedra</td></tr>
+        <tr><td class="pron-gua">o</td><td class="pron-br">como em "bolo" (fechado)</td><td>oho</td><td>ele foi</td></tr>
+        <tr><td class="pron-gua">u</td><td class="pron-br">como em "uva"</td><td>uruhu</td><td>urubu</td></tr>
+        <tr><td class="pron-gua">y</td><td class="pron-br">⚠️ entre "i" e "u", som do meio da língua — como "u" quase fechado. Sem equivalente direto no PT-BR. Tente dizer "i" relaxando a boca levemente.</td><td>y'y</td><td>água</td></tr>
+        <tr><td class="pron-gua">ã / ẽ</td><td class="pron-br">vogal nasal — como em "mã-e" (mãe), "ẽ" (hm)</td><td>kunhã</td><td>mulher</td></tr>
+      </table>
+    </div>
+
+    <div class="pron-guide-section card">
+      <h3>🔡 Consoantes Especiais</h3>
+      <table class="pron-table">
+        <tr><th>Letra</th><th>Som (BR)</th><th>Exemplo GUA</th><th>Significa</th></tr>
+        <tr><td class="pron-gua">x</td><td class="pron-br">⭐ como "sh" de "show" — é o som de "CH" suave como em "acho", "chave" do PT-BR. <strong>NÃO é "ks"!</strong></td><td>xe</td><td>eu / meu</td></tr>
+        <tr><td class="pron-gua">r (inicial)</td><td class="pron-br">como "r" forte, igual ao "rr" de "carro"</td><td>ru</td><td>pai</td></tr>
+        <tr><td class="pron-gua">r (entre vogais)</td><td class="pron-br">como "r" brando de "cara", "hora"</td><td>maraná</td><td>olá</td></tr>
+        <tr><td class="pron-gua">nh</td><td class="pron-br">igual ao "nh" do português: "manhã", "sonho"</td><td>kunhã</td><td>mulher</td></tr>
+        <tr><td class="pron-gua">mh / ng</td><td class="pron-br">consoante nasal velar — como "ng" de "manga" mas pré-nasalizado. Pense em "ngue" de "linguiça"</td><td>angatu</td><td>bom/bem</td></tr>
+        <tr><td class="pron-gua">h</td><td class="pron-br">como "h" aspirado — como em "Harry". Mais suave que o "rr" do PT-BR.</td><td>oho</td><td>foi</td></tr>
+        <tr><td class="pron-gua">' (apóstrofo)</td><td class="pron-br">⭐ oclusiva glotal — uma pausa mínima, como entre "po-em" ou a pausa em "uh-oh" do inglês. Importante: muda o significado!</td><td>y'y</td><td>água (vs yy)</td></tr>
+        <tr><td class="pron-gua">w</td><td class="pron-br">como em "wifi" — semivogal labial</td><td>wa</td><td>plural/vir</td></tr>
+      </table>
+    </div>
+
+    <div class="pron-guide-section card">
+      <h3>❓ Dúvidas Frequentes</h3>
+
+      <div style="margin-bottom:1rem">
+        <div style="color:var(--sun);font-weight:700;margin-bottom:.4rem">📌 "Xe" — como pronunciar?</div>
+        <div class="tts-pron-note">
+          <strong>Xe</strong> (= eu, meu) se pronuncia <strong>"SHÊ"</strong> — como a letra "CH" em português: CHÁ, CHEgada, CHUva. O "e" final é fechado, quase um "ê".<br>
+          Exemplos: <em>Xe ru</em> = "shê-rú" (meu pai) | <em>Xe sy</em> = "shê-sí" (minha mãe)<br>
+          <span style="color:#aaa">❌ NÃO é "kice", nem "ekce" do inglês. É simplesmente "CHÊ" do português.</span>
+        </div>
+        <button class="tts-btn" style="margin-top:.5rem" onclick="speakGuajajara('Xe','shê')">🔊 Ouvir "Xe"</button>
+      </div>
+
+      <div style="margin-bottom:1rem">
+        <div style="color:var(--sun);font-weight:700;margin-bottom:.4rem">📌 "Sy" — como pronunciar?</div>
+        <div class="tts-pron-note">
+          <strong>Sy</strong> (= mãe) se pronuncia aproximadamente <strong>"SÍ"</strong> — o "s" é como em "sapato" e o "y" é uma vogal central, mas para falantes do BR soa quase como "i" de "vida". Então: "SÍ" é uma boa aproximação.<br>
+          <em>Xe sy</em> = "shê-sí" = Minha mãe<br>
+          <span style="color:#aaa">✓ O "y" tecnicamente é uma vogal central NÃO-arredondada (entre "i" e "u"), mas "ci/si" é suficiente para se fazer entender.</span>
+        </div>
+        <button class="tts-btn" style="margin-top:.5rem" onclick="speakGuajajara('Sy','sí')">🔊 Ouvir "Sy"</button>
+      </div>
+
+      <div style="margin-bottom:1rem">
+        <div style="color:var(--sun);font-weight:700;margin-bottom:.4rem">📌 "Kunhã" — como pronunciar?</div>
+        <div class="tts-pron-note">
+          <strong>Kunhã</strong> (= mulher) se pronuncia <strong>"ku-NHÃ"</strong> — exatamente como parece em português!<br>
+          • "ku" = como em "cubo"<br>
+          • "nhã" = como em "manhã" (o "nh" é igual ao do PT + a vogal nasal "ã")<br>
+          <span style="color:#aaa">✓ NÃO é "kun-rrã". É literalmente "ku-nhã" como você leria em português.</span>
+        </div>
+        <button class="tts-btn" style="margin-top:.5rem" onclick="speakGuajajara('Kunhã','ku-nhã')">🔊 Ouvir "Kunhã"</button>
+      </div>
+
+      <div style="margin-bottom:1rem">
+        <div style="color:var(--sun);font-weight:700;margin-bottom:.4rem">📌 "Y'y" — como pronunciar?</div>
+        <div class="tts-pron-note">
+          <strong>Y'y</strong> (= água) — o apóstrofo é uma pausa glotal. Pronuncia-se aproximadamente <strong>"Y' · Y"</strong> com pausa no meio. Para o PT-BR: diga "i" central (quase "u" relaxado), faça uma mini-pausa, e repita. É um som único do Guajajara!
+        </div>
+        <button class="tts-btn" style="margin-top:.5rem" onclick="speakGuajajara(\"y'y\",'i-i com pausa')">🔊 Ouvir "Y'y"</button>
+      </div>
+    </div>
+
+    <div class="pron-guide-section card">
+      <h3>🎵 Tonicidade e Acento</h3>
+      <p style="font-size:.87rem;line-height:1.7">O Guajajara geralmente acentua a <strong style="color:var(--sun)">última sílaba</strong> das palavras. Isso é diferente do português, que tende a acentuar a penúltima. Preste atenção:<br><br>
+      • <em>maraná</em> = ma-ra-<strong>NÁ</strong> (não "MA-ra-na")<br>
+      • <em>angatu</em> = an-ga-<strong>TU</strong> (bom/bem)<br>
+      • <em>memihar</em> = me-mi-<strong>HAR</strong><br><br>
+      <span style="color:var(--clay)">Exceção: palavras curtas de uma sílaba são ditas como estão.</span></p>
+    </div>
+  </div>
+
+  <!-- DICTIONARY -->
+  <div class="panel" id="panel-dictionary">
+    <div class="dict-search-wrap">
+      <span class="dict-search-icon">🔍</span>
+      <input class="dict-search" type="text" placeholder="Buscar em Guajajara ou Português..." id="dictInput" oninput="searchDict(this.value)">
+    </div>
+    <div class="badge-row" style="margin-bottom:.8rem">
+      <button class="badge badge-green" style="cursor:pointer;border:none" onclick="filterDict('all')">Todos</button>
+      <button class="badge badge-blue" style="cursor:pointer;border:none" onclick="filterDict('substantivo')">Substantivos</button>
+      <button class="badge badge-orange" style="cursor:pointer;border:none" onclick="filterDict('verbo')">Verbos</button>
+      <button class="badge badge-green" style="cursor:pointer;border:none;background:rgba(201,74,26,.2);color:var(--clay);border-color:var(--urucum)" onclick="filterDict('expressao')">Expressões</button>
+    </div>
+    <div class="dict-results" id="dict-results"></div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="panel" id="panel-quiz">
+    <div id="quiz-setup">
+      <div class="card">
+        <div class="card-title">🏆 Quiz Guajajara</div>
+        <p>Escolha o módulo e nível para começar o quiz:</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin:.7rem 0">
+        <div class="module-btn" onclick="startQuiz('saudacoes')">
+          <span class="mod-icon">👋</span>
+          <span class="mod-name">Saudações</span>
+        </div>
+        <div class="module-btn" onclick="startQuiz('familia')">
+          <span class="mod-icon">👨‍👩‍👧</span>
+          <span class="mod-name">Família</span>
+        </div>
+        <div class="module-btn" onclick="startQuiz('numeros')">
+          <span class="mod-icon">🔢</span>
+          <span class="mod-name">Números</span>
+        </div>
+        <div class="module-btn" onclick="startQuiz('alimentos')">
+          <span class="mod-icon">🍎</span>
+          <span class="mod-name">Alimentos</span>
+        </div>
+        <div class="module-btn" onclick="startQuiz('animais')">
+          <span class="mod-icon">🐾</span>
+          <span class="mod-name">Animais</span>
+        </div>
+        <div class="module-btn" onclick="startQuiz('natureza')">
+          <span class="mod-icon">🌿</span>
+          <span class="mod-name">Natureza</span>
+        </div>
+      </div>
+    </div>
+    <div id="quiz-active" style="display:none">
+      <div class="quiz-progress"><div class="quiz-progress-bar" id="quiz-bar" style="width:0%"></div></div>
+      <div style="text-align:center;color:var(--lime);font-size:.85rem;margin-bottom:.5rem" id="quiz-counter">1 / 10</div>
+      <div class="quiz-question" id="quiz-q"></div>
+      <div class="quiz-options" id="quiz-opts"></div>
+      <div id="quiz-feedback" style="text-align:center;margin-top:.8rem;min-height:40px"></div>
+    </div>
+    <div id="quiz-result" style="display:none" class="quiz-score card">
+      <div style="font-size:3rem" id="quiz-emoji">🎉</div>
+      <h2 id="quiz-score-text">8 / 10</h2>
+      <p id="quiz-score-msg">Excelente! Você está aprendendo bem!</p>
+      <button class="btn-start" style="margin-top:1rem;font-size:.9rem" onclick="resetQuiz()">Tentar Novamente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── ARAWY GUIDE BUTTON ─────────────────────────────────── -->
+<div class="guide-bubble" id="guide-bubble">
+  <button class="close-bubble" onclick="closeGuide()">✕</button>
+  <div id="guide-text">Olá! Sou <strong>Arawy</strong>, sua arara-guia! Toque em qualquer 🔊 para ouvir a pronúncia. Precisa de ajuda com algum som?</div>
+</div>
+<button class="guide-btn" id="guide-btn" onclick="toggleGuide()" title="Arawy — Guia de Pronúncia">🦜</button>
+
+<script src="app.js"></script>
+<script src="vocab-extra.js"></script>
+<script src="features-extra.js"></script>
+<script src="arawy-ai.js"></script>
+</body>
+</html>
