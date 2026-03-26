@@ -6,6 +6,10 @@
 <meta name="theme-color" content="#1a3a1a">
 <meta name="description" content="Nhe'ẽ - Aprenda a língua Guajajara (Tenetehára)">
 <title>Nhe'ẽ — Língua Guajajara</title>
+<!-- ─── FAVICON SVG inline (arara-azul + fundo floresta) ── -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f2a0f'/%3E%3Cellipse cx='32' cy='38' rx='13' ry='16' fill='%232466b0'/%3E%3Cellipse cx='32' cy='22' rx='11' ry='10' fill='%232466b0'/%3E%3Cellipse cx='32' cy='22' rx='8' ry='7.5' fill='%233a7fd6'/%3E%3Cpath d='M27 26 Q25 30 29 28 Q27 26 27 26Z' fill='%231a1a00'/%3E%3Ccircle cx='27' cy='19' r='3.5' fill='white'/%3E%3Ccircle cx='27' cy='19' r='2' fill='%231a1a00'/%3E%3Ccircle cx='37' cy='19' r='3.5' fill='white'/%3E%3Ccircle cx='37' cy='19' r='2' fill='%231a1a00'/%3E%3Cpath d='M24 24 Q25 31 32 31 Q39 31 40 24' stroke='%23f5b942' stroke-width='2' fill='none'/%3E%3Cellipse cx='32' cy='42' rx='7' ry='9' fill='%23f5e6c0'/%3E%3Cellipse cx='18' cy='37' rx='9' ry='14' fill='%231a55a0' transform='rotate(-15 18 37)'/%3E%3Cellipse cx='46' cy='37' rx='9' ry='14' fill='%231a55a0' transform='rotate(15 46 37)'/%3E%3Cpath d='M26 56 Q32 63 38 56 Q35 59 32 60 Q29 59 26 56Z' fill='%231a55a0'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f2a0f'/%3E%3Ctext y='50' x='32' text-anchor='middle' font-size='44'%3E%F0%9F%A6%9C%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230f2a0f'/%3E%3Cellipse cx='90' cy='108' rx='37' ry='45' fill='%232466b0'/%3E%3Cellipse cx='90' cy='62' rx='31' ry='28' fill='%232466b0'/%3E%3Cellipse cx='90' cy='62' rx='22' ry='21' fill='%233a7fd6'/%3E%3Cpath d='M76 73 Q70 85 80 80 Q76 73 76 73Z' fill='%231a1a00'/%3E%3Ccircle cx='76' cy='54' r='9' fill='white'/%3E%3Ccircle cx='76' cy='54' r='5.5' fill='%231a1a00'/%3E%3Ccircle cx='104' cy='54' r='9' fill='white'/%3E%3Ccircle cx='104' cy='54' r='5.5' fill='%231a1a00'/%3E%3Cpath d='M67 68 Q70 87 90 87 Q110 87 113 68' stroke='%23f5b942' stroke-width='5' fill='none'/%3E%3Cellipse cx='90' cy='120' rx='20' ry='25' fill='%23f5e6c0'/%3E%3Cellipse cx='50' cy='108' rx='25' ry='40' fill='%231a55a0' transform='rotate(-15 50 108)'/%3E%3Cellipse cx='130' cy='108' rx='25' ry='40' fill='%231a55a0' transform='rotate(15 130 108)'/%3E%3C/svg%3E">
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Nunito:wght@400;600;800&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
@@ -140,33 +144,108 @@ body {
 }
 .topbar-mascot:hover { animation-play-state: paused; transform: scale(1.15); }
 
-/* ─── NAV TABS ───────────────────────────────────────────── */
-.nav-tabs {
-  display: flex; overflow-x: auto; gap: .3rem;
-  padding: .5rem .8rem;
+/* ─── NAV TABS ─────────────────────────────────────────────
+   Two-layer nav:
+   • Layer 1 (top bar): primary tabs always visible, hamburger ☰ reveals drawer
+   • Layer 2 (drawer): full scrollable list slides down when ☰ is tapped
+   Works on 320px → desktop without any overflow clipping
+─────────────────────────────────────────────────────────── */
+.nav-wrapper {
   background: var(--canopy);
   border-bottom: 1px solid var(--leaf);
+  position: sticky; top: 0; z-index: 90;
+}
+
+/* Primary strip: shows only on desktop (≥600px) */
+.nav-tabs-primary {
+  display: none;          /* hidden on mobile */
+  flex-wrap: wrap;
+  gap: .3rem;
+  padding: .5rem .8rem;
   scrollbar-width: none;
 }
-.nav-tabs::-webkit-scrollbar { display: none; }
+.nav-tabs-primary::-webkit-scrollbar { display: none; }
+
+/* Mobile strip: logo-sized pill + hamburger */
+.nav-mobile-bar {
+  display: flex;
+  align-items: center;
+  padding: .45rem .8rem;
+  gap: .4rem;
+}
+.nav-active-label {
+  flex: 1;
+  color: var(--sun);
+  font-weight: 800;
+  font-size: .9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-hamburger {
+  background: rgba(74,140,63,.25);
+  border: 1px solid var(--moss);
+  border-radius: 10px;
+  padding: .4rem .65rem;
+  color: var(--lime);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background .2s;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.nav-hamburger.open,
+.nav-hamburger:hover { background: var(--urucum); color: #fff; border-color: var(--clay); }
+
+/* Drawer */
+.nav-drawer {
+  display: none;
+  flex-direction: column;
+  background: var(--forest);
+  border-top: 1px solid var(--leaf);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .35s ease;
+}
+.nav-drawer.open {
+  display: flex;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.nav-drawer-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .4rem;
+  padding: .7rem;
+}
+
+/* Shared tab style */
 .nav-tab {
   flex: 0 0 auto;
-  padding: .45rem 1rem;
-  border: 2px solid transparent;
+  padding: .45rem .85rem;
+  border: 1.5px solid transparent;
   border-radius: 20px;
   background: transparent;
   color: var(--lime);
   font-family: 'Nunito', sans-serif;
-  font-size: .85rem; font-weight: 700;
+  font-size: .82rem; font-weight: 700;
   cursor: pointer;
-  transition: all .2s;
+  transition: all .18s;
   white-space: nowrap;
+  text-align: center;
 }
-.nav-tab:hover { background: var(--leaf); color: var(--sun); }
+.nav-tab:hover  { background: var(--leaf); color: var(--sun); }
 .nav-tab.active {
   background: var(--urucum);
   border-color: var(--clay);
   color: #fff;
+}
+
+/* Desktop: show primary strip, hide mobile bar */
+@media (min-width: 600px) {
+  .nav-tabs-primary { display: flex; }
+  .nav-mobile-bar   { display: none; }
+  .nav-drawer       { display: none !important; }
 }
 
 /* ─── CONTENT PANELS ─────────────────────────────────────── */
@@ -600,9 +679,7 @@ body {
     <div class="app-name">Nhe'ẽ</div>
     <div class="app-subtitle">Língua Guajajara · Tenetehára</div>
     <div class="app-tagline">"A palavra que carrega a alma do povo"</div>
-    <button class="btn-start" onclick="startApp()">
-  ✨ Começar a aprender
-</button>
+    <button class="btn-start" onclick="startApp()">✨ Começar a Aprender</button>
   </div>
 </div>
 
@@ -623,14 +700,37 @@ body {
     </svg>
   </div>
 
-  <div class="nav-tabs" id="navTabs">
-    <button class="nav-tab active" onclick="showPanel('home')">🏠 Início</button>
-    <button class="nav-tab" onclick="showPanel('history')">📜 História</button>
-    <button class="nav-tab" onclick="showPanel('course')">📚 Curso</button>
-    <button class="nav-tab" onclick="showPanel('pronunciation')">🎵 Pronúncia</button>
-    <button class="nav-tab" onclick="showPanel('dictionary')">📖 Dicionário</button>
-    <button class="nav-tab" onclick="showPanel('quiz')">🏆 Quiz</button>
-  </div>
+  <!-- ─── RESPONSIVE NAV ─────────────────────────────────── -->
+  <nav class="nav-wrapper" id="navWrapper">
+
+    <!-- Mobile bar: active tab label + hamburger -->
+    <div class="nav-mobile-bar">
+      <span class="nav-active-label" id="navActiveLabel">🏠 Início</span>
+      <button class="nav-hamburger" id="navHamburger" onclick="toggleNavDrawer()" aria-label="Menu de navegação">☰</button>
+    </div>
+
+    <!-- Desktop primary strip (wraps on wide screens) -->
+    <div class="nav-tabs-primary" id="navTabs">
+      <button class="nav-tab active" onclick="showPanel('home')">🏠 Início</button>
+      <button class="nav-tab" onclick="showPanel('history')">📜 História</button>
+      <button class="nav-tab" onclick="showPanel('course')">📚 Curso</button>
+      <button class="nav-tab" onclick="showPanel('pronunciation')">🎵 Pronúncia</button>
+      <button class="nav-tab" onclick="showPanel('dictionary')">📖 Dicionário</button>
+      <button class="nav-tab" onclick="showPanel('quiz')">🏆 Quiz</button>
+    </div>
+
+    <!-- Mobile drawer grid -->
+    <div class="nav-drawer" id="navDrawer">
+      <div class="nav-drawer-inner" id="navDrawerInner">
+        <button class="nav-tab active" onclick="showPanel('home');closeNavDrawer()">🏠 Início</button>
+        <button class="nav-tab" onclick="showPanel('history');closeNavDrawer()">📜 História</button>
+        <button class="nav-tab" onclick="showPanel('course');closeNavDrawer()">📚 Curso</button>
+        <button class="nav-tab" onclick="showPanel('pronunciation');closeNavDrawer()">🎵 Pronúncia</button>
+        <button class="nav-tab" onclick="showPanel('dictionary');closeNavDrawer()">📖 Dicionário</button>
+        <button class="nav-tab" onclick="showPanel('quiz');closeNavDrawer()">🏆 Quiz</button>
+      </div>
+    </div>
+  </nav>
 
   <!-- HOME -->
   <div class="panel active" id="panel-home">
@@ -862,6 +962,20 @@ body {
       <p style="font-size:.87rem">"Sou especialista em sons! Aprenda a pronúncia correta do Guajajara. Atenção especial para falantes de português brasileiro — alguns sons são quase iguais, outros exigem prática!"</p>
     </div>
 
+    <div class="card" style="background:rgba(30,74,30,.5);border-color:var(--moss)">
+      <div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap">
+        <span style="font-size:1.1rem">🔊</span>
+        <div style="flex:1">
+          <div style="color:var(--lime);font-size:.85rem;font-weight:700">Voz TTS ativa</div>
+          <div id="tts-voice-name" style="color:var(--clay);font-size:.78rem">Detectando...</div>
+        </div>
+        <button class="tts-btn" onclick="speakGuajajara('Maraná','ma-ra-NÁ')" style="width:36px;height:36px;font-size:.9rem">▶</button>
+      </div>
+      <div style="color:var(--clay);font-size:.75rem;margin-top:.5rem">
+        💡 Para melhor qualidade: use Chrome no Android (voz Google Neural pt-BR) ou Safari no iOS (voz Siri pt-BR). Amazon Polly está disponível via AWS SDK para apps nativos.
+      </div>
+    </div>
+
     <div class="pron-guide-section card">
       <h3>🔤 Vogais Guajajara</h3>
       <p style="font-size:.85rem;color:var(--clay);margin-bottom:.7rem">O Guajajara tem 6 vogais: a, e, i, o, u, y (vogal central não-arredondada)</p>
@@ -1021,5 +1135,6 @@ body {
 <script src="vocab-extra.js"></script>
 <script src="features-extra.js"></script>
 <script src="arawy-ai.js"></script>
+<script src="nhee-patch.js"></script>
 </body>
 </html>
