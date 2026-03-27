@@ -11,14 +11,20 @@
   function resize() {
     W = canvas.width  = window.innerWidth;
     H = canvas.height = window.innerHeight;
+    // Re-seed particles on resize so they don't pile up off-screen
+    particles.forEach(p => {
+      if (p.x > W) p.x = Math.random() * W;
+      if (p.y > H) p.y = Math.random() * H;
+    });
   }
   resize();
   window.addEventListener('resize', resize);
 
-  // Fireflies / stars
+  // Fireflies / stars — initial positions within viewport
   for (let i = 0; i < 80; i++) {
     particles.push({
-      x: Math.random() * 9999, y: Math.random() * 9999,
+      x: Math.random() * (window.innerWidth  || 400),
+      y: Math.random() * (window.innerHeight || 800),
       r: Math.random() * 2.5 + .5,
       a: Math.random(),
       da: (Math.random() - .5) * .02,
@@ -43,7 +49,10 @@
     };
   }
   for (let i = 0; i < 12; i++) {
-    const l = makeLeaf(); l.y = Math.random() * 9999; leaves.push(l);
+    const l = makeLeaf();
+    l.x = Math.random() * (window.innerWidth  || 400);
+    l.y = Math.random() * (window.innerHeight || 800);
+    leaves.push(l);
   }
 
   function drawLeaf(ctx, leaf) {
@@ -100,40 +109,263 @@ function startApp() {
   document.getElementById('app').classList.add('visible');
   setTimeout(() => {
     document.getElementById('splash').style.display = 'none';
+    initDict();
     setTimeout(() => arawySpeak('welcome'), 2000);
   }, 900);
 }
 
+// ─── RESPONSIVE NAV ──────────────────────────────────────────────────────────
+function toggleNavDrawer() {
+  const drawer  = document.getElementById('navDrawer');
+  const burger  = document.getElementById('navHamburger');
+  if (!drawer) return;
+  const isOpen = drawer.classList.contains('open');
+  if (isOpen) {
+    drawer.classList.remove('open');
+    burger.classList.remove('open');
+    burger.textContent = '☰';
+  } else {
+    drawer.classList.add('open');
+    burger.classList.add('open');
+    burger.textContent = '✕';
+  }
+}
+function closeNavDrawer() {
+  const drawer = document.getElementById('navDrawer');
+  const burger = document.getElementById('navHamburger');
+  if (drawer) drawer.classList.remove('open');
+  if (burger) { burger.classList.remove('open'); burger.textContent = '☰'; }
+}
+
 function showPanel(id) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   const panel = document.getElementById('panel-' + id);
   if (panel) panel.classList.add('active');
-  const tab = document.querySelector(`.nav-tab[data-panel="${id}"]`);
-  if (tab) tab.classList.add('active');
+
+  // Sync ALL tab sets (primary strip + drawer)
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  const labelMap = {
+    home: '🏠 Início', history: '📜 História', course: '📚 Curso',
+    pronunciation: '🎵 Pronúncia', dictionary: '📖 Dicionário', quiz: '🏆 Quiz'
+  };
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    const label = labelMap[id];
+    if (label && t.textContent.trim() === label) t.classList.add('active');
+  });
+  // Update mobile label
+  const lbl = document.getElementById('navActiveLabel');
+  if (lbl && labelMap[id]) lbl.textContent = labelMap[id];
+
+  closeNavDrawer();
   window.scrollTo(0, 0);
 }
 
-// ─── TTS ENGINE (PT-BR adjusted for Guajajara sounds) ─────────────────────────
-function speakGuajajara(word, phonetic) {
-  if (!window.speechSynthesis) { alert('TTS não disponível neste dispositivo.'); return; }
-  window.speechSynthesis.cancel();
-  const text = phonetic || word;
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = 'pt-BR';
-  utter.rate = 0.78;
-  utter.pitch = 1.05;
-  // Try to find a pt-BR voice
-  const voices = window.speechSynthesis.getVoices();
-  const ptVoice = voices.find(v => v.lang === 'pt-BR') || voices.find(v => v.lang.startsWith('pt'));
-  if (ptVoice) utter.voice = ptVoice;
-  window.speechSynthesis.speak(utter);
+// ─── TTS ENGINE · VERSÃO DEFINITIVA ─────────────────────────────────────────
+// Estratégia única e sem conflito com patches externos:
+//  1. Web Speech API com voz MASCULINA pt-BR selecionada por score
+//  2. Fonetizador Guajajara → pt-BR preciso, nunca passa abreviações tipo "shê"
+//
+// POR QUE NÃO MAIS RESPONSIVEVOICE / TTSMAKER:
+//  - ResponsiveVoice: CDN instável, bloqueia em alguns navegadores corporativos
+//  - TTSMaker: demo token expira, CORS inconsistente
+//  - A voz Google pt-BR no Chrome desktop é excelente quando selecionada corretamente
+//
+// REGRA FUNDAMENTAL: nunca passe ao TTS a grafia Guajajara pura (xe, shê, sy...).
+// Sempre converta ANTES para o equivalente pt-BR que o TTS consegue ler corretamente.
+
+const _TTS = {
+  _voices: [],
+  _ready: false,
+
+  // Tabela fonética: Guajajara → o que enviar ao TTS pt-BR
+  // Baseado em Harrison & Harrison (1984) + testes empíricos com Chrome/Edge pt-BR
+  _dict: {
+    // Saudações e expressões comuns
+    'maraná':      'maraná',           // acento na última — pt-BR lê correto
+    'angatu':      'angatu',           // an-ga-TU
+    'aguyje':      'aguijê',           // a-gu-YÊ → aguijê
+    'ikatu':       'icatu',
+    'kwáhy':       'quái',
+    'maraí':       'maraí',
+    'memihar':     'memirár',
+    'tekohaw':     'tecoráu',          // haw final → "ráu" suave
+    'hayhu':       'raíu',             // h=r suave, muito característico
+    'toré':        'toré',
+    'maracá':      'maracá',
+    'porahẽi':     'porarêi',
+    'jeroky':      'jeroqui',
+    'pahy':        'paí',
+    'rorysáwy':    'rorissáui',
+    'poxy':        'pochi',            // x=ch
+    'kyje':        'quijê',
+    'mokã':        'mocã',
+    'oho':         'orô',              // h entre vogais = r suave
+    'kunhã':       'cunhã',            // ku-NHÃ — correto em pt-BR
+    'ñe':          'nhê',
+  },
+
+  // Converte texto Guajajara → texto legível pelo TTS pt-BR
+  // Regras em ordem de prioridade
+  phonetic(text) {
+    if (!text) return '';
+    let t = text.trim();
+
+    // 1. Verificar dicionário de palavras completas (case-insensitive)
+    const lower = t.toLowerCase();
+    if (this._dict[lower]) return this._dict[lower];
+
+    // 2. Regras de substituição sistemáticas
+    // X antes de vogal = CH do português (ex: xe → che, xa → cha)
+    t = t.replace(/xe/gi, 'chê');
+    t = t.replace(/xa/gi, 'chá');
+    t = t.replace(/xi/gi, 'chi');
+    t = t.replace(/xo/gi, 'chô');
+    t = t.replace(/xu/gi, 'chu');
+    t = t.replace(/x([aáâãeéêiíoóôõuú])/gi, 'ch$1');
+
+    // Y vogal central → I (aproximação para pt-BR)
+    // Não substituir em yw, já tratado abaixo
+    t = t.replace(/wy/gi, 'wi');
+    t = t.replace(/ky([aeiou])/gi, 'qui$1');
+    t = t.replace(/ky/gi, 'qui');
+    t = t.replace(/py([aeiou])/gi, 'pi$1');
+    t = t.replace(/py/gi, 'pi');
+    t = t.replace(/([^aeiouãẽĩõũáéíóúâêîôû\s])y([^aeiouãẽĩõũáéíóúâêîôû\s'])/g, '$1i$2');
+    t = t.replace(/([^aeiouãẽĩõũáéíóúâêîôû\s])y\s/g, '$1i ');
+    t = t.replace(/([^aeiouãẽĩõũáéíóúâêîôû\s])y$/g, '$1i');
+    t = t.replace(/y([^aeiouãẽĩõũáéíóúâêîôû])/g, 'i$1');
+    t = t.replace(/y$/g, 'i');
+
+    // Oclusiva glotal → pausa curta (espaço ou vírgula)
+    t = t.replace(/'/g, ' ');
+
+    // Ñ → nh
+    t = t.replace(/ñ/gi, 'nh');
+
+    // H entre vogais → R suave (característica fonética Guajajara)
+    t = t.replace(/([aeiouãẽĩõũáéíóúâêîôû])h([aeiouãẽĩõũáéíóúâêîôû])/gi, '$1r$2');
+
+    // Haw final → "ráu"
+    t = t.replace(/haw/gi, 'ráu');
+
+    // Remove hifens de separação silábica (prejudicam TTS)
+    t = t.replace(/-/g, ' ');
+
+    // Múltiplos espaços → um
+    t = t.replace(/\s{2,}/g, ' ').trim();
+
+    return t;
+  },
+
+  // Seleciona melhor voz pt-BR disponível — prioriza masculina/neural,
+  // evita vozes femininas genéricas conhecidas por distorção
+  _bestVoice() {
+    if (!this._ready) {
+      this._voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+      this._ready  = this._voices.length > 0;
+    }
+    if (!this._voices.length) return null;
+
+    const pt = this._voices.filter(v =>
+      v.lang === 'pt-BR' || v.lang === 'pt_BR' || v.lang.startsWith('pt')
+    );
+    if (!pt.length) return null;
+
+    const score = v => {
+      const n = v.name.toLowerCase();
+      let s = v.lang === 'pt-BR' ? 50 : 20;
+      // Neural/Premium = melhor qualidade de prosódia e acentuação
+      if (n.includes('neural'))    s += 60;
+      if (n.includes('premium'))   s += 55;
+      if (n.includes('enhanced'))  s += 50;
+      if (n.includes('google'))    s += 30;
+      // Vozes masculinas pt-BR têm melhor leitura de palavras com acento final
+      if (n.includes('marcos') || n.includes('antonio') || n.includes('miguel'))  s += 25;
+      if (n.includes('daniel') || n.includes('rafael') || n.includes('paulo'))    s += 20;
+      if (n.includes('male') || n.includes('masculin'))                           s += 15;
+      // Penaliza vozes femininas genéricas (Luciana distorce sílaba tônica final)
+      if (n.includes('luciana'))  s -= 40;
+      if (n.includes('ana') && !n.includes('iana')) s -= 20;
+      if (n.includes('maria'))    s -= 20;
+      if (n.includes('clara'))    s -= 20;
+      return s;
+    };
+
+    return pt.sort((a, b) => score(b) - score(a))[0];
+  },
+
+  speak(word, phonetic) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+
+    // Escolhe o texto: usa phonetic se fornecido, senão converte word
+    const text = (phonetic && phonetic !== word && phonetic.trim())
+      ? this.phonetic(phonetic)
+      : this.phonetic(word);
+
+    const utter    = new SpeechSynthesisUtterance(text);
+    utter.lang     = 'pt-BR';
+    utter.rate     = 0.78;   // mais lento para aprendizado
+    utter.pitch    = 0.92;   // levemente mais grave → mais claro para vogais nasais
+    utter.volume   = 1.0;
+
+    const voice = this._bestVoice();
+    if (voice) utter.voice = voice;
+
+    setTimeout(() => window.speechSynthesis.speak(utter), 60);
+  }
+};
+
+// Carrega vozes assim que disponíveis
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    _TTS._voices = window.speechSynthesis.getVoices();
+    _TTS._ready  = true;
+    _updateVoiceLabel();
+  };
+  _TTS._voices = window.speechSynthesis.getVoices();
+  _TTS._ready  = _TTS._voices.length > 0;
 }
 
-// Ensure voices are loaded (guard: speechSynthesis ausente em alguns navegadores móveis)
-if (window.speechSynthesis) {
-  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+// API pública — usada em todo o app via onclick="speakGuajajara(...)"
+function speakGuajajara(word, phonetic) {
+  _TTS.speak(word, phonetic);
 }
+
+function speakPT(text) {
+  if (!window.speechSynthesis || !text) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text.substring(0, 300));
+  utter.lang  = 'pt-BR';
+  utter.rate  = 0.88;
+  const voice = _TTS._bestVoice();
+  if (voice) utter.voice = voice;
+  setTimeout(() => window.speechSynthesis.speak(utter), 60);
+}
+
+function _updateVoiceLabel() {
+  const el = document.getElementById('tts-voice-name');
+  if (!el) return;
+  const voice = _TTS._bestVoice();
+  if (!voice) { el.textContent = 'Carregando vozes...'; return; }
+  const n = voice.name.toLowerCase();
+  const quality = n.includes('neural')   ? '⭐ Neural' :
+                  n.includes('premium')  ? '✓ Premium' :
+                  n.includes('enhanced') ? '✓ Enhanced' :
+                  n.includes('google')   ? '✓ Google'  : 'Padrão';
+  const gender = n.includes('marcos')||n.includes('miguel')||n.includes('paulo')||
+                 n.includes('daniel')||n.includes('rafael') ? ' · Masculina' :
+                 n.includes('luciana')||n.includes('ana')||n.includes('clara') ? ' · Feminina' : '';
+  el.innerHTML = `🔊 <strong>${voice.name}</strong> (${voice.lang}) · ${quality}${gender}`;
+  el.style.color = quality.includes('Neural')||quality.includes('Premium') ? 'var(--lime)' : 'var(--clay)';
+}
+setTimeout(_updateVoiceLabel, 1200);
+
+// Compatibilidade com patches antigos — garantem que nenhum patch
+// sobrescreva acidentalmente a função principal
+window._guaToPhonetic    = t => _TTS.phonetic(t);
+window._guaPhonetic      = t => _TTS.phonetic(t);
+window._guaPhoneticFull  = t => _TTS.phonetic(t);
 
 // ─── ARAWY GUIDE ──────────────────────────────────────────────────────────────
 const arawyMessages = {
@@ -751,3 +983,26 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   });
 }
+
+// ─── TTS VOICE DETECTOR (updates UI label) ────────────────────────────────────
+function _updateVoiceLabel() {
+  const el = document.getElementById('tts-voice-name');
+  if (!el) return;
+  if (!window.speechSynthesis) { el.textContent = 'TTS não disponível neste dispositivo'; return; }
+  const v = _bestVoice();
+  if (!v) { el.textContent = 'Voz padrão do sistema'; return; }
+  const quality = _scoreVoice(v) >= 140 ? '⭐ Alta qualidade (Neural)' :
+                  _scoreVoice(v) >= 100 ? '✓ Boa qualidade' : 'Básica';
+  el.textContent = `${v.name} (${v.lang}) · ${quality}`;
+}
+// Run after voices load
+setTimeout(_updateVoiceLabel, 1500);
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = () => { _loadVoices(); _updateVoiceLabel(); };
+}
+
+// ─── CLOSE DRAWER ON OUTSIDE CLICK ───────────────────────────────────────────
+document.addEventListener('click', e => {
+  const wrapper = document.getElementById('navWrapper');
+  if (wrapper && !wrapper.contains(e.target)) closeNavDrawer();
+});
