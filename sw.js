@@ -1,5 +1,5 @@
 // Nhe'ẽ PWA Service Worker — v1.0
-const CACHE = 'nhee-guajajara-v4';
+const CACHE = 'nhee-guajajara-v5';
 const ASSETS = [
   './',
   './index.html',
@@ -10,6 +10,7 @@ const ASSETS = [
   './tts-video-patch.js',
   './videos-panel.js',
   './nhee-patch.js',
+  './final-update.js',
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Nunito:wght@400;600;800&family=Kalam:wght@400;700&display=swap'
 ];
