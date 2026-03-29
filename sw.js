@@ -1,5 +1,5 @@
 // Nhe'ẽ PWA Service Worker — v1.0
-const CACHE = 'nhee-guajajara-v5';
+const CACHE = 'nhee-guajajara-v6';
 const ASSETS = [
   './',
   './index.html',

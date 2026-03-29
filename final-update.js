@@ -497,35 +497,8 @@ function arawyOfflineFull(question) {
 Ou use 📚 Curso · 🎵 Pronúncia · 📖 Dicionário 🌿`;
 }
 
-// Patch no ArawyAI para usar nova lógica offline e salvar respostas online
-if (typeof ArawyAI !== 'undefined') {
-  const origAsk = ArawyAI.ask.bind(ArawyAI);
-  ArawyAI.ask = async function(question) {
-    // Tenta online primeiro
-    try {
-      const text = await this._callAPI();
-      if (text) {
-        this.history.push({ role: 'assistant', content: text });
-        // SALVA para uso offline futuro
-        saveToOfflineKnowledge(question, text);
-        return text;
-      }
-    } catch (err) {
-      console.warn('[Arawy] Online indisponível:', err.message);
-    }
-    // Fallback offline inteligente
-    return arawyOfflineFull(question);
-  };
-}
+// ArawyAI logic is now fully in arawy-ai.js
 
-// Patch nas sugestões clicáveis do painel Arawy
-// Garante que o onclick das sugestões usa sendToArawy corretamente
-function patchArawySuggestions() {
-  const panel = document.getElementById('panel-arawy');
-  if (!panel) return;
-  // As sugestões já usam sendToArawy(JSON.stringify(s)) que está correto
-  // Apenas garantimos que o painel está visível e funcional
-}
 
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -534,7 +507,6 @@ function patchArawySuggestions() {
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     upgradeVideoPanels();
-    patchArawySuggestions();
   }, 600);
 });
 

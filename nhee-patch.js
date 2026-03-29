@@ -148,183 +148,48 @@
 
   // Patch showPanelExtra: chama o mesmo fluxo do showPanel agora unificado
   window.showPanelExtra = function(id) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    const panel = document.getElementById(`panel-${id}`);
-    if (panel) {
-      panel.classList.add('active');
-      // Re-render dinâmico
-      const reMap = {
-        profile:      () => typeof Progress !== 'undefined' ? Progress.renderProfilePanel() : '',
-        flashcards:   () => typeof renderFlashcardsPanel   !== 'undefined' ? renderFlashcardsPanel()   : '',
-        voice:        () => typeof renderVoicePracticePanel!== 'undefined' ? renderVoicePracticePanel() : '',
-        writing:      () => typeof renderWritingPanel      !== 'undefined' ? renderWritingPanel()       : '',
-        match:        () => typeof renderMatchPanel        !== 'undefined' ? renderMatchPanel()         : '',
-        conversation: () => typeof renderConversationPanel !== 'undefined' ? renderConversationPanel()  : '',
-        stories:      () => typeof renderStoriesPanel      !== 'undefined' ? renderStoriesPanel()       : '',
-        notif:        () => typeof renderNotifPanel        !== 'undefined' ? renderNotifPanel()         : '',
-        arawy:        () => typeof renderArawyPanel        !== 'undefined' ? renderArawyPanel()         : '',
-      };
-      if (reMap[id]) panel.innerHTML = reMap[id]();
-    }
-    applyDataPanel();
-    document.querySelectorAll('.nav-tab').forEach(t => {
-      t.classList.toggle('active', t.getAttribute('data-panel') === id);
-    });
-    const lbl = document.getElementById('navActiveLabel');
-    if (lbl) {
-      const found = document.querySelector(`.nav-tab[data-panel="${id}"]`);
-      if (found) lbl.textContent = found.textContent.trim();
-    }
-    if (typeof closeNavDrawer === 'function') closeNavDrawer();
-    window.scrollTo(0, 0);
-  };
-})();
+  // Single authoritative definition — all extra panels
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
 
-
-// ─── 3. TTS UPGRADE — ResponsiveVoice + Polly fallback ───────────────────────
-// ResponsiveVoice.org: camada gratuita sobre Amazon Polly / Google WaveNet.
-// Para uso não-comercial/educacional não exige chave.
-// Voz padrão: "Brazilian Portuguese Female" → Vitória (Polly Neural)
-//
-// Fluxo:
-//  1. Se ResponsiveVoice carregou → usa ele (melhor qualidade, gratuito)
-//  2. Senão → Speech Synthesis API com fonetização Guajajara ajustada
-//
-// NOTA IMPORTANTE sobre Amazon Polly e Guajajara:
-//  - Não existe uma voz Tenetehára/Guajajara no Polly ou em qualquer TTS comercial.
-//  - A melhor aproximação para falante PT-BR é a voz "Vitória" (Polly Neural pt-BR).
-//  - O texto é fonetizado antes de ser enviado ao TTS para aproximar a pronúncia correta.
-//  - Para pronúncia 100% autêntica, só áudios gravados por falantes nativos.
-
-(function patchTTS() {
-  // Injeta ResponsiveVoice CDN se não estiver presente
-  if (!window.responsiveVoice && !document.getElementById('rv-script')) {
-    const s = document.createElement('script');
-    s.id  = 'rv-script';
-    // CDN público gratuito — não-comercial / educacional
-    s.src = 'https://code.responsivevoice.org/responsivevoice.js?key=FREE';
-    s.async = true;
-    s.onerror = () => console.warn('[TTS] ResponsiveVoice não carregou — usando WebSpeech API.');
-    document.head.appendChild(s);
-  }
-
-  // Fonetizador Guajajara → pt-BR (já existe em app.js mas centralizamos aqui)
-  window._guaPhonetic = function(text) {
-    if (!text) return '';
-    return text
-      // x antes de vogal = CH do PT
-      .replace(/\bxe\b/gi, 'chê')
-      .replace(/\bxa\b/gi, 'chá')
-      .replace(/\bxi\b/gi, 'chi')
-      .replace(/\bxo\b/gi, 'chó')
-      .replace(/\bxu\b/gi, 'chu')
-      .replace(/x([aeiouãẽĩõũáéíóúàèìòùâêîôûäëïöü])/gi, 'ch$1')
-      // y isolado (vogal central) → "i" para TTS
-      .replace(/\by([^'yY])/g, 'i$1')
-      .replace(/\by$/g, 'i')
-      .replace(/y'/g, "i-")
-      // Oclusiva glotal → pausa curta
-      .replace(/'/g, ' ')
-      // wy → "wi"
-      .replace(/\bwy/g, 'wi')
-      // ky → "ki"
-      .replace(/\bky\b/gi, 'ki')
-      // py → "pi"
-      .replace(/\bpy\b/gi, 'pi')
-      // ñ → nh (se não foi normalizado)
-      .replace(/ñ/g, 'nh')
-      // Acentuação da última sílaba: TTS pt-BR já faz isso naturalmente
-      .trim();
-  };
-
-  // Nova speakGuajajara unificada
-  window.speakGuajajara = function(word, phonetic) {
-    const rawText   = phonetic && phonetic !== word ? phonetic : window._guaPhonetic(word);
-    const speakText = rawText || word;
-
-    // ① Tenta ResponsiveVoice (Amazon Polly Neural pt-BR via proxy gratuito)
-    if (window.responsiveVoice && window.responsiveVoice.voiceSupport()) {
-      window.responsiveVoice.speak(speakText, 'Brazilian Portuguese Female', {
-        rate:   0.78,    // mais lento = mais claro para aprendiz
-        pitch:  1.0,
-        volume: 1.0,
-        onstart:  () => {},
-        onerror:  () => _fallbackTTS(speakText),
-      });
-      return;
-    }
-
-    // ② Fallback: Web Speech API
-    _fallbackTTS(speakText);
-  };
-
-  function _fallbackTTS(text) {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const utter    = new SpeechSynthesisUtterance(text);
-    utter.lang     = 'pt-BR';
-    utter.rate     = 0.72;
-    utter.pitch    = 1.0;
-    utter.volume   = 1.0;
-    // Escolhe melhor voz disponível
-    const voices = window.speechSynthesis.getVoices();
-    const ptVoices = voices.filter(v => v.lang === 'pt-BR' || v.lang.startsWith('pt'));
-    if (ptVoices.length) {
-      // Prefere Neural/Premium
-      const best = ptVoices.sort((a,b) => {
-        const score = v => {
-          const n = (v.name+v.lang).toLowerCase();
-          return (n.includes('neural')?40:0) + (n.includes('premium')?35:0) +
-                 (n.includes('enhanced')?30:0) + (n.includes('google')?20:0) +
-                 (n.includes('vitoria')||n.includes('vitória')?15:0) +
-                 (n.includes('francisca')?15:0) + (n.includes('camila')?15:0);
-        };
-        return score(b) - score(a);
-      })[0];
-      utter.voice = best;
-    }
-    setTimeout(() => window.speechSynthesis.speak(utter), 80);
-  }
-
-  // Atualiza label de qualidade de voz no guia de pronúncia
-  function updateVoiceLabel() {
-    const el = document.getElementById('tts-voice-name');
-    if (!el) return;
-    if (window.responsiveVoice && window.responsiveVoice.voiceSupport()) {
-      el.innerHTML = '🌟 <strong>ResponsiveVoice</strong> — Amazon Polly Neural pt-BR (gratuito) ativo';
-      el.style.color = 'var(--lime)';
-    } else if (window.speechSynthesis) {
-      const voices = window.speechSynthesis.getVoices().filter(v=>v.lang.startsWith('pt'));
-      if (voices.length) {
-        const v = voices[0];
-        const q = (v.name+v.lang).toLowerCase().includes('neural') ? '⭐ Neural' :
-                  (v.name+v.lang).toLowerCase().includes('premium') ? '✓ Premium' : 'Básica';
-        el.textContent = `${v.name} (${v.lang}) · ${q}`;
-      } else {
-        el.textContent = 'Voz padrão do sistema';
-      }
+  const panel = document.getElementById('panel-' + id);
+  if (panel) {
+    panel.classList.add('active');
+    // Re-render dynamic panels
+    const renders = {
+      profile:      () => typeof Progress !== 'undefined' ? Progress.renderProfilePanel() : '',
+      flashcards:   () => typeof renderFlashcardsPanel   !== 'undefined' ? renderFlashcardsPanel()   : '',
+      voice:        () => typeof renderVoicePracticePanel!== 'undefined' ? renderVoicePracticePanel() : '',
+      writing:      () => typeof renderWritingPanel      !== 'undefined' ? renderWritingPanel()       : '',
+      match:        () => typeof renderMatchPanel        !== 'undefined' ? renderMatchPanel()         : '',
+      conversation: () => typeof renderConversationPanel !== 'undefined' ? renderConversationPanel()  : '',
+      stories:      () => typeof renderStoriesPanel      !== 'undefined' ? renderStoriesPanel()       : '',
+      notif:        () => typeof renderNotifPanel        !== 'undefined' ? renderNotifPanel()         : '',
+      videos:       () => typeof renderVideosPanel       !== 'undefined' ? renderVideosPanel()        : '',
+    };
+    // Arawy: re-ancorar eventos em vez de re-renderizar (preserva histórico)
+    if (id === 'arawy') {
+      if (typeof _attachArawyEvents === 'function') _attachArawyEvents();
+      if (typeof _checkArawyDot === 'function') setTimeout(_checkArawyDot, 300);
+    } else if (renders[id]) {
+      const html = renders[id]();
+      if (html) panel.innerHTML = html;
     }
   }
-  setTimeout(updateVoiceLabel, 2000);
-  if (window.speechSynthesis)
-    window.speechSynthesis.onvoiceschanged = updateVoiceLabel;
 
-  // Também aguarda ResponsiveVoice carregar e atualiza
-  document.addEventListener('rvLoaded', updateVoiceLabel);
-  setTimeout(updateVoiceLabel, 4000);
-})();
+  // Sync active tabs (both primary strip and drawer)
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    t.classList.toggle('active', t.getAttribute('data-panel') === id);
+  });
 
+  // Update mobile label
+  const lbl = document.getElementById('navActiveLabel');
+  if (lbl) {
+    const found = document.querySelector('.nav-tab[data-panel="' + id + '"]');
+    if (found) lbl.textContent = found.textContent.trim();
+  }
 
-// ─── 4. INCONSISTÊNCIAS CORRIGIDAS ────────────────────────────────────────────
-
-// 4a. Quiz: wrongs pool pode estar vazio antes de initDict() rodar
-//     Patch para garantir pool mínimo
-const _origStartQuiz = window.startQuiz;
-window.startQuiz = function(modKey) {
-  // Garante que allWords está populado
-  if (typeof allWords !== 'undefined' && allWords.length === 0 &&
-      typeof initDict === 'function') initDict();
-  if (_origStartQuiz) _origStartQuiz(modKey);
+  if (typeof closeNavDrawer === 'function') closeNavDrawer();
+  window.scrollTo(0, 0);
 };
 
 // 4b. Lição: escapa aspas simples em palavras com apóstrofo (ex: "ko'i")

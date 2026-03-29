@@ -266,6 +266,13 @@ const _TTS = {
     }
     if (!this._voices.length) return null;
 
+    // ── Respeita escolha do usuário (salva em localStorage via final-update.js) ──
+    const savedName = window._selectedVoiceName || localStorage.getItem('nhee_voice') || '';
+    if (savedName) {
+      const chosen = this._voices.find(v => v.name === savedName);
+      if (chosen) return chosen;
+    }
+
     const pt = this._voices.filter(v =>
       v.lang === 'pt-BR' || v.lang === 'pt_BR' || v.lang.startsWith('pt')
     );
